@@ -75,4 +75,7 @@ Content-Type: application/json
 - Backends orientés microservices
 - Dashboards de monitoring
 - Applications SaaS back-office
+
+
+Voir le projet généré : https://github.com/coundia/cqrs-webflux-starter
  
