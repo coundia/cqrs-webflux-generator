@@ -1,0 +1,28 @@
+package {{package}};
+
+{{#imports}}
+	import {{.}};
+{{/imports}}
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Component;
+import java.util.concurrent.CompletableFuture;
+import java.util.List;
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
+@Component
+@RequiredArgsConstructor
+public class FindBy{{field.nameCapitalized}}{{name}}Handler {
+
+private final {{name}}Repository repository;
+
+public CompletableFuture<List<{{name}}Response>> handle(FindBy{{field.nameCapitalized}}{{name}}Query query) {
+	return repository
+	.getBy{{field.nameCapitalized}}(query.get{{field.nameCapitalized}}().value())
+	.map({{name}}Mapper::toResponse)
+	.collectList()
+	.doOnSuccess(list -> log.info("Found {} {{nameLowerCase}} by {{field.name}}", list.size()))
+	.doOnError(error -> log.error("Error finding {{nameLowerCase}} by {{field.name}}: {}", error.getMessage(), error))
+	.toFuture();
+	}
+}

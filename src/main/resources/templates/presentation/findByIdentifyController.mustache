@@ -1,0 +1,66 @@
+package {{package}};
+{{#imports}}
+import {{.}};
+{{/imports}}
+import {{queryPackage}}.FindBy{{identifier.nameCapitalized}}{{name}}Query;
+import {{dtoPackage}}.{{name}}Response;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+import reactor.core.publisher.Mono;
+
+@RestController
+@RequestMapping("/api/v1/queries/{{nameLowerCase}}")
+@Tag(name = "{{name}} Query", description = "Endpoints for querying {{nameLowerCase}} by {{identifier.name}}")
+@Slf4j
+public class FindBy{{identifier.nameCapitalized}}{{name}}Controller {
+
+private final FindBy{{identifier.nameCapitalized}}{{name}}Handler handler;
+
+public FindBy{{identifier.nameCapitalized}}{{name}}Controller(FindBy{{identifier.nameCapitalized}}{{name}}Handler handler) {
+this.handler = handler;
+}
+
+@GetMapping("/{id}")
+@Operation(
+summary = "Find a {{nameLowerCase}} by {{identifier.name}}",
+description = "Returns a {{nameLowerCase}} resource given its unique {{identifier.name}}"
+)
+@ApiResponses(value = {
+@ApiResponse(
+responseCode = "200",
+description = "{{name}} found successfully",
+content = @Content(mediaType = "application/json", schema = @Schema(implementation = {{name}}Response.class))
+),
+@ApiResponse(
+responseCode = "404",
+description = "{{name}} not found",
+content = @Content
+),
+@ApiResponse(
+responseCode = "500",
+description = "Internal server error",
+content = @Content
+)
+})
+public Mono<ResponseEntity<List<{{name}}Response>>> findBy{{identifier.nameCapitalized}}(
+	@Parameter(description = "The unique identifier of the {{nameLowerCase}}", required = true)
+	@PathVariable String id
+	) {
+	FindBy{{identifier.nameCapitalized}}{{name}}Query query = new FindBy{{identifier.nameCapitalized}}{{name}}Query({{identifier.nameCapitalized}}{{name}}.create(id));
+
+	return Mono.fromFuture(handler.handle(query))
+	.map(ResponseEntity::ok)
+	.onErrorResume(ex -> {
+	log.error("Failed to find {{nameLowerCase}} by {{identifier.name}}: {}", ex.getMessage(), ex);
+	return Mono.just(ResponseEntity.internalServerError().build());
+	});
+	}
+}

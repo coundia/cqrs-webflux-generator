@@ -1,0 +1,51 @@
+package {{package}};
+
+{{#imports}}
+import {{.}};
+{{/imports}}
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import reactor.core.publisher.Mono;
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
+@Service
+@RequiredArgsConstructor
+public class {{name}}CommandHandler {
+
+private final {{entity}}Repository repository;
+private final {{entity}}Publisher publisher;
+
+public Mono<Void> handle({{name}}Command command) {
+
+{{#isUpdate}}
+	{{entity}} entity = {{entity}}.builder()
+	{{#fields}}
+		.{{name}}(command.get{{nameCapitalized}}().value())
+	{{/fields}}
+	.id(command.getId().value())
+	.build();
+	return repository.save(entity)
+{{/isUpdate}}
+	{{#isCreate}}
+	return repository.insert(
+	{{#fields}} command.get{{nameCapitalized}}().value(){{^last}},{{/last}}
+	{{/fields}}
+	)
+	{{/isCreate}}
+	{{#isDelete}}
+		return repository.deleteById(command.getId().value())
+	{{/isDelete}}
+	.doOnSuccess(
+	saved -> {
+	log.info("{{entity}} entity: {}", saved);
+	{{^isDelete}}
+	publisher.publish({{entity}}Mapper.toResponse(saved));
+	{{/isDelete}}
+
+	}
+	)
+	.doOnError(error -> log.error("Error  {{entity}}: {}", error.getMessage(), error))
+	.then();
+	}
+}

@@ -1,0 +1,82 @@
+package {{package}};
+
+{{#imports}}
+	import {{.}};
+{{/imports}}
+
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+import reactor.core.publisher.Mono;
+
+@RestController
+@RequestMapping("/api/v1/commands/{{nameLowerCase}}")
+@Tag(name = "{{name}} commands", description = "Endpoints for managing {{nameLowerCase}}s")
+@Slf4j
+public class Update{{name}}Controller {
+
+private final Update{{name}}CommandHandler handler;
+
+public Update{{name}}Controller(Update{{name}}CommandHandler handler) {
+this.handler = handler;
+}
+
+@PutMapping("/{id}")
+@Operation(
+summary = "Update an existing {{nameLowerCase}}",
+description = "Updates an existing {{nameLowerCase}} by ID and returns the updated entity"
+)
+@ApiResponses(value = {
+@ApiResponse(
+responseCode = "200",
+description = "{{name}} updated successfully",
+content = @Content(mediaType = "application/json", schema = @Schema(implementation = {{name}}Response.class))
+),
+@ApiResponse(
+responseCode = "400",
+description = "Invalid input data",
+content = @Content
+),
+@ApiResponse(
+responseCode = "500",
+description = "Internal server error",
+content = @Content
+)
+})
+public Mono<ResponseEntity<{{name}}Response>> update{{name}}(
+	@Parameter(description = "The ID of the {{nameLowerCase}} to update", required = true)
+	@PathVariable String id,
+
+	@io.swagger.v3.oas.annotations.parameters.RequestBody(
+	description = "{{name}} data to update",
+	required = true,
+	content = @Content(schema = @Schema(implementation = {{name}}Request.class))
+	)
+	@RequestBody {{name}}Request {{nameLowerCase}}Request
+	) {
+	Update{{name}}Command command = {{name}}Mapper.toUpdateCommand({{name}}Id.create(id),
+	{{nameLowerCase}}Request);
+	command.setId({{name}}Id.create(id));
+
+	return handler.handle(command)
+	.doOnSuccess(v -> log.info("{{name}} updated successfully with ID: {}", id))
+	.thenReturn(ResponseEntity.ok(
+	new {{name}}Response(
+	{{#fields}}
+		command.get{{nameCapitalized}}().value(){{^last}},{{/last}}
+	{{/fields}}
+	)
+	))
+	.onErrorResume(ex -> {
+	log.error("Failed to update {{nameLowerCase}}: {}", ex.getMessage(), ex);
+	return Mono.just(ResponseEntity.internalServerError().build());
+	});
+	}
+}

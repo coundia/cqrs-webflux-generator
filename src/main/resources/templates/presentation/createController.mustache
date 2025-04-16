@@ -1,0 +1,60 @@
+package {{package}};
+{{#imports}}
+	import {{.}};
+{{/imports}}
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+import reactor.core.publisher.Mono;
+
+@RestController
+@RequestMapping("/api/v1/commands/{{nameLowerCase}}")
+@Tag(name = "{{name}} commands", description = "Endpoints for managing {{nameLowerCase}}s")
+@Slf4j
+public class Add{{name}}Controller {
+
+private final Create{{name}}CommandHandler handler;
+
+public Add{{name}}Controller(Create{{name}}CommandHandler handler) {
+this.handler = handler;
+}
+
+@PostMapping
+@Operation(
+summary = "Create a new {{nameLowerCase}}",
+description = "Creates a new {{nameLowerCase}} and returns the created entity",
+requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+description = "{{name}} request payload",
+required = true,
+content = @Content(schema = @Schema(implementation = {{name}}Request.class))
+)
+)
+@ApiResponses(value = {
+@ApiResponse(responseCode = "200", description = "Successfully created",
+content = @Content(schema = @Schema(implementation = {{name}}Response.class))),
+@ApiResponse(responseCode = "500", description = "Internal server error",
+content = @Content(schema = @Schema()))
+})
+public Mono<ResponseEntity<{{name}}Response>> add{{name}}(@RequestBody {{name}}Request {{nameLowerCase}}Request) {
+	Create{{name}}Command command = {{name}}Mapper.toCommand({{nameLowerCase}}Request);
+
+	return handler.handle(command)
+	.doOnSuccess(v -> log.info("{{name}} created successfully"))
+	.thenReturn(ResponseEntity.ok(
+	new {{name}}Response(
+	{{#fields}}
+		command.get{{nameCapitalized}}().value(){{^last}},{{/last}}
+	{{/fields}}
+	)))
+	.onErrorResume(ex -> {
+	log.error("Failed to create {{nameLowerCase}}: {}", ex.getMessage(), ex);
+	return Mono.just(ResponseEntity.internalServerError().build());
+	});
+	}
+}

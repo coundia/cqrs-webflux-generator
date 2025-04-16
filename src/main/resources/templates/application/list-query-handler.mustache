@@ -1,0 +1,46 @@
+package {{package}};
+
+{{#imports}}
+import {{.}};
+{{/imports}}
+import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
+@Component
+public class List{{entity}}QueryHandler {
+
+private final {{entity}}Repository {{entityLower}}Repository;
+
+public List{{entity}}QueryHandler({{entity}}Repository {{entityLower}}Repository) {
+this.{{entityLower}}Repository = {{entityLower}}Repository;
+}
+
+public CompletableFuture<{{entity}}PagedResponse> handle(List{{entity}}Query query) {
+	int limit = query.getLimit();
+	int offset = query.getPage() * query.getLimit();
+
+	Mono<Long> totalElements = {{entityLower}}Repository.findAll().count();
+		Mono<List<{{entity}}>> items = {{entityLower}}Repository.findAllByPage(limit, offset).collectList();
+
+		return Mono.zip(items, totalElements)
+		.map(tuple -> {
+		List<{{entity}}Response> responses = tuple.getT1().stream()
+			.map({{entity}}Mapper::toResponse)
+			.toList();
+
+			return {{entity}}PagedResponse.from(
+			responses,
+			query.getPage(),
+			query.getLimit(),
+			tuple.getT2(),
+			tuple.getT2() / query.getLimit()
+			);
+			})
+			.doOnSuccess(result -> log.info("List {{entity}} query handled: page={}, size={}, total={}",
+			query.getPage(), query.getLimit(), result.getTotalElements()))
+			.doOnError(error -> log.error("Error during list {{entity}} query: {}", error.getMessage(), error))
+			.toFuture();
+			}
+}

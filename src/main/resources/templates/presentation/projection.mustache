@@ -1,0 +1,47 @@
+package {{package}};
+
+{{#imports}}
+import {{.}};
+{{/imports}}
+
+import org.springframework.stereotype.Component;
+import reactor.core.publisher.Mono;
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
+@Component
+public class {{name}}Projection {
+
+private final {{name}}Repository repository;
+
+public {{name}}Projection({{name}}Repository repository) {
+this.repository = repository;
+}
+
+public void on({{name}}CreatedEvent event) {
+	 repository.insert(
+	{{#fields}}            event.get{{nameCapitalized}}().value(){{^last}},{{/last}}
+	{{/fields}}
+	).subscribe(
+		inserted -> log.info("{{name}} inserted: {}", inserted),
+		error -> log.error("Error saving {{name}}: {}", error.getMessage(), error)
+	);
+	}
+
+	public void on({{name}}UpdatedEvent event) {
+		 repository.updateAllById(
+		{{#fields}}        event.get{{nameCapitalized}}().value(){{^last}},{{/last}}
+		{{/fields}}
+		).doOnSuccess(unused -> log.info("{{name}} updated successfully: {}", event.getId().value()))
+		.doOnError(error -> log.error("Error updating {{name}}: {}", error.getMessage(), error))
+		.subscribe();
+	}
+
+
+	public void on({{name}}DeletedEvent event) {
+		 repository.deleteById(event.getId().value())
+			.doOnSuccess(unused -> log.info("{{name}} deleted successfully: {}", event.getId().value()))
+			.doOnError(error -> log.error("Error deleting {{name}}: {}", error.getMessage(), error))
+			.subscribe();
+		}
+}

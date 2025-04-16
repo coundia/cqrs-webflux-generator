@@ -1,0 +1,66 @@
+package {{package}};
+
+{{#imports}}
+import {{.}};
+{{/imports}}
+import java.util.UUID;
+
+public class {{name}}Mapper {
+
+public static {{name}}Response toResponse({{name}} entity) {
+return new {{name}}Response(
+{{#allFields}}
+	{{#isManyToOne}}
+		entity.get{{nameCapitalized}}().getId(){{^last}}, {{/last}}
+	{{/isManyToOne}}
+	{{^isManyToOne}}
+		entity.get{{nameCapitalized}}(){{^last}}, {{/last}}
+	{{/isManyToOne}}
+{{/allFields}}
+);
+}
+
+public static {{name}}Response toResponse(Create{{name}}Command command) {
+return new {{name}}Response(
+{{#allFields}}command.get{{nameCapitalized}}().value(){{^last}}, {{/last}}{{/allFields}}
+);
+}
+
+public static {{name}}Response toResponse(Update{{name}}Command command) {
+return new {{name}}Response(
+{{#allFields}}command.get{{nameCapitalized}}().value(){{^last}}, {{/last}}{{/allFields}}
+);
+}
+
+
+public static Create{{name}}Command toCommand(
+	{{name}}Request request{{#hasFiles}}, {{#fieldFiles}}{{type}} {{nameCamelCase}}{{^last}}, {{/last}}{{/fieldFiles}}{{/hasFiles}}
+) {
+return new Create{{name}}Command(
+{{name}}Id.create(UUID.randomUUID().toString()),
+{{#fields}}{{^isId}}{{entity}}{{nameCapitalized}}.create(request.get{{nameCapitalized}}()){{^last}}, {{/last}}{{/isId}}{{/fields}}{{#hasFiles}}, {{#fieldFiles}}{{nameCamelCase}}{{^last}}, {{/last}}{{/fieldFiles}}{{/hasFiles}}
+);
+}
+{{^hasFiles}}
+public static Update{{name}}Command toUpdateCommand({{name}}Id id, {{name}}Request request) {
+return new Update{{name}}Command(
+id{{#allFields}}{{^isId}}, {{entity}}{{nameCapitalized}}.create(request.get{{nameCapitalized}}()){{/isId}}{{/allFields}}
+);
+}
+{{/hasFiles}}
+{{#hasFiles}}
+public static Update{{name}}Command toUpdateCommand({{name}}Id id, {{name}}Request request{{#hasFiles}},
+{{#fieldFiles}}{{entity}}{{nameCapitalized}}  {{nameCamelCase}}{{^last}}, {{/last}}{{/fieldFiles}}{{/hasFiles}}) {
+return new Update{{name}}Command(
+id{{#fields}}{{^isId}}, {{entity}}{{nameCapitalized}}.create(
+request.get{{nameCapitalized}}()){{/isId}}{{/fields}}{{#hasFiles}},
+{{#fieldFiles}}{{nameCamelCase}}{{^last}}, {{/last}}{{/fieldFiles}}{{/hasFiles}}
+);
+}
+{{/hasFiles}}
+
+
+public static Delete{{name}}Command toDeleteCommand({{name}}Id id) {
+return new Delete{{name}}Command(id);
+}
+}

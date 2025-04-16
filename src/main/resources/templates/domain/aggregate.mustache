@@ -1,0 +1,44 @@
+package {{package}};
+
+{{#imports}}
+import {{.}};
+{{/imports}}
+import java.io.Serializable;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.Builder;
+
+@Getter
+@Setter
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder
+public class {{name}}Aggregate implements Serializable {
+
+private {{name}}Id id;
+{{#fields}}
+	{{^isId}}    private {{type}} {{name}};
+	{{/isId}}
+{{/fields}}
+
+public static {{name}}Aggregate create(Create{{name}}Command command) {
+return {{name}}Aggregate.builder()
+{{#fields}}            .{{name}}(command.get{{nameCapitalized}}()){{#last}}
+	.id(command.getId()){{/last}}
+{{/fields}}
+.build();
+}
+
+public void applyUpdate(Update{{name}}Command command) {
+{{#fields}}
+	{{^isId}}        this.{{name}} = command.get{{nameCapitalized}}();
+	{{/isId}}
+{{/fields}}
+}
+
+public void applyDelete(Delete{{name}}Command command) {
+this.id = command.getId();
+}
+}

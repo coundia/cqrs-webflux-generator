@@ -1,0 +1,18 @@
+package {{package}};
+{{#imports}}
+import {{.}};
+{{/imports}}
+import org.junit.jupiter.api.Test;
+
+public class {{className}} extends BaseIntegrationTests {
+
+@Test
+void it_should_{{testAction}}() {
+this
+.get("{{endpoint}}")
+.expectStatus().isOk()
+.expectBody()
+.jsonPath("$.code").isEqualTo(1)
+.jsonPath("$.message").isEqualTo("{{expectedMessage}}");
+}
+}

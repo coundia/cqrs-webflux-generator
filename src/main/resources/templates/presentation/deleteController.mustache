@@ -1,0 +1,66 @@
+package {{package}};
+
+{{#imports}}
+import {{.}};
+{{/imports}}
+
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+import reactor.core.publisher.Mono;
+
+@RestController
+@RequestMapping("/api/v1/commands/{{nameLowerCase}}")
+@Tag(name = "{{name}} commands", description = "Endpoints for managing {{nameLowerCase}}s")
+@Slf4j
+public class Delete{{name}}Controller {
+
+private final Delete{{name}}CommandHandler handler;
+
+public Delete{{name}}Controller(Delete{{name}}CommandHandler handler) {
+this.handler = handler;
+}
+
+@DeleteMapping("/{id}")
+@Operation(
+summary = "Delete a {{nameLowerCase}}",
+description = "Deletes a {{nameLowerCase}} based on the provided identifier"
+)
+@ApiResponses(value = {
+@ApiResponse(responseCode = "200", description = "{{name}} deleted successfully"),
+@ApiResponse(responseCode = "400", description = "Invalid ID supplied", content = @Content),
+@ApiResponse(responseCode = "404", description = "{{name}} not found", content = @Content),
+@ApiResponse(responseCode = "500", description = "Internal server error", content = @Content)
+})
+public Mono<ResponseEntity<String>> delete{{name}}(
+	@Parameter(description = "ID of the {{nameLowerCase}} to delete", required = true)
+	@PathVariable String id
+	) {
+	if (id == null || id.isEmpty()) {
+	return Mono.just(ResponseEntity.badRequest().body("Invalid id"));
+	}
+
+	log.info("Deleting {{name}} with id: {}", id);
+
+	Delete{{name}}Command command = Delete{{name}}Command.builder()
+	.id({{name}}Id.create(id))
+	.build();
+
+	return handler.handle(command)
+	.doOnSuccess(v -> log.info("{{name}} deleted successfully"))
+	.thenReturn(ResponseEntity.ok("{{name}} deleted successfully"))
+	.onErrorResume(ex -> {
+	log.error("Error deleting {{name}}: {}", ex.getMessage(), ex);
+	return Mono.just(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+	.body("Error deleting {{name}}: " + ex.getMessage()));
+	});
+	}
+}
