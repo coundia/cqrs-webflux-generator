@@ -51,14 +51,22 @@ src/
 ## ⚙️ Utilisation
 
 ```bash
-POST /api/generate
+POST http://127.0.0.1:8070/api/v1/generator/all
+Accept: application/x-ndjson
+Content-Type: application/json
+
 {
-  "name": "Transaction",
-  "fields": [
-    {"name": "reference", "type": "String"},
-    {"name": "amount", "type": "Double"}
-  ]
-}
+    "outputDir": "/Users/pcoundia/projects/cqrs-rabbitmq-webflux-starter/src/main/java/com/pcoundia/transactions",
+    "definition": {
+      "name": "Transaction",
+      "table": "transactions",
+      "fields": [
+        { "name": "id", "type": "String" },
+        { "name": "reference", "type": "String" },
+        { "name": "amount", "type": "Double" }
+      ]
+    }
+  }
 ```
 
 ## 📱 Domaines d'application
