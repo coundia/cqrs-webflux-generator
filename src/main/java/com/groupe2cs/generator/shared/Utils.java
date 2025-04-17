@@ -31,6 +31,15 @@ public class Utils {
         }
         return outputDir;
     }
+    public static  String getParent(String outputDir) {
+        Path path = Paths.get(outputDir);
+
+        if(path.getParent() != null) {
+            return path.getParent().toString();
+        }
+
+        return outputDir;
+    }
 
 
     public static String getTestPackage(String fullPath) {

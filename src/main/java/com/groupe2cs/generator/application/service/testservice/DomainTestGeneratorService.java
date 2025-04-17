@@ -35,11 +35,12 @@ public class DomainTestGeneratorService {
                         "tests/AggregateTests.mustache",
                         Set.of(
                                 Utils.getTestPackage(baseDir + "/" + generatorProperties.getVoPackage()) + ".*",
-                                Utils.getTestPackage(baseDir + "/" + generatorProperties.getSharedPackage()) + ".*",
                                 Utils.getTestPackage(baseDir + "/" + generatorProperties.getExceptionPackage()) + ".*",
+                                Utils.getTestPackage(baseDir + "/" + generatorProperties.getSharedPackage()) + ".*",
                                 "org.junit.jupiter.api.Test",
                                 "static org.assertj.core.api.Assertions.assertThat",
-                                "static org.junit.jupiter.api.Assertions.assertThrows"
+                                "static org.junit.jupiter.api.Assertions.assertThrows",
+                                "java.util.UUID"
                         ),
                         baseDir
                 )

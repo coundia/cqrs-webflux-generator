@@ -1,0 +1,25 @@
+package {{package}};
+
+{{#imports}}
+import {{.}};
+{{/imports}}
+
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+
+public class {{name}}FindByIdControllerIntegrationTest extends BaseIntegrationTests {
+
+@Autowired
+private {{name}}Repository {{nameLower}}Repository;
+
+@Test
+void it_should_be_able_to_get_{{nameLower}}_by_id() {
+{{name}} entity = {{name}}Fixtures.randomOne({{nameLower}}Repository).block();
+String existingId = entity.getId();
+
+this.get("/v1/queries/{{nameLower}}/by-id?id=" + existingId)
+.expectStatus().isOk()
+.expectBody()
+.jsonPath("$.data.id").isEqualTo(existingId);
+}
+}

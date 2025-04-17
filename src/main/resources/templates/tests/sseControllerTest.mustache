@@ -1,0 +1,42 @@
+package {{package}};
+
+{{#imports}}
+import {{.}};
+{{/imports}}
+
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
+import reactor.core.publisher.Flux;
+import reactor.test.StepVerifier;
+import java.time.Duration;
+
+public class {{name}}SseControllerTest extends BaseIntegrationTests {
+
+@Autowired
+private {{name}}Repository repository;
+
+@Test
+void it_should_stream_{{nameLower}}s_as_sse() {
+{{name}}Fixtures.deleteAll(repository).block();
+{{name}}Fixtures.randomMany(repository, 1).block();
+
+Flux<String> stream = this.webTestClient.get()
+	.uri("/api/v1/queries/{{nameLower}}/stream")
+	.accept(MediaType.TEXT_EVENT_STREAM)
+	.exchange()
+	.returnResult(String.class)
+	.getResponseBody();
+
+	StepVerifier.create(stream)
+	.expectNextMatches(json ->
+	{{#fields}}
+		{{^isId}}
+			json.contains("{{nameLowerCase}}") {{^last}} &&{{/last}}
+		{{/isId}}
+	{{/fields}}
+	)
+	.thenCancel()
+	.verify(Duration.ofSeconds(5));
+	}
+}

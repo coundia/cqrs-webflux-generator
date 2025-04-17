@@ -1,0 +1,27 @@
+package {{package}};
+
+{{#imports}}
+import {{.}};
+{{/imports}}
+
+import org.junit.jupiter.api.Test;
+import static org.assertj.core.api.Assertions.assertThat;
+
+public class {{name}}CreateControllerIntegrationTest extends BaseIntegrationTests {
+
+@Test
+void it_should_be_able_to_add_{{nameLower}}() {
+{{name}}Request requestDTO = {{name}}Request.random();
+
+	this.post("/v1/commands/{{nameLower}}", requestDTO)
+		.expectStatus().isOk()
+		.expectBody()
+		.jsonPath("$.code").isEqualTo(1)
+		.jsonPath("$.data.id").isNotEmpty()
+		{{#fields}}
+			{{^isId}}
+				.jsonPath("$.data.{{nameCamelCase}}").isEqualTo(requestDTO.get{{nameCapitalized}}())
+			{{/isId}}
+		{{/fields}};
+	}
+}

@@ -12,9 +12,9 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
+import com.pcoundia.shared.application.ApiResponseDto;
 
 @RestController
 @RequestMapping("/api/v1/commands/{{nameLowerCase}}")
@@ -37,7 +37,7 @@ description = "Updates an existing {{nameLowerCase}} by ID and returns the updat
 @ApiResponse(
 responseCode = "200",
 description = "{{name}} updated successfully",
-content = @Content(mediaType = "application/json", schema = @Schema(implementation = {{name}}Response.class))
+content = @Content(mediaType = "application/json", schema = @Schema(implementation = ApiResponseDto.class))
 ),
 @ApiResponse(
 responseCode = "400",
@@ -50,7 +50,7 @@ description = "Internal server error",
 content = @Content
 )
 })
-public Mono<ResponseEntity<{{name}}Response>> update{{name}}(
+public Mono<ApiResponseDto> update{{name}}(
 	@Parameter(description = "The ID of the {{nameLowerCase}} to update", required = true)
 	@PathVariable String id,
 
@@ -61,13 +61,12 @@ public Mono<ResponseEntity<{{name}}Response>> update{{name}}(
 	)
 	@RequestBody {{name}}Request {{nameLowerCase}}Request
 	) {
-	Update{{name}}Command command = {{name}}Mapper.toUpdateCommand({{name}}Id.create(id),
-	{{nameLowerCase}}Request);
+	Update{{name}}Command command = {{name}}Mapper.toUpdateCommand({{name}}Id.create(id), {{nameLowerCase}}Request);
 	command.setId({{name}}Id.create(id));
 
 	return handler.handle(command)
 	.doOnSuccess(v -> log.info("{{name}} updated successfully with ID: {}", id))
-	.thenReturn(ResponseEntity.ok(
+	.thenReturn(ApiResponseDto.ok(
 	new {{name}}Response(
 	{{#fields}}
 		command.get{{nameCapitalized}}().value(){{^last}},{{/last}}
@@ -76,7 +75,7 @@ public Mono<ResponseEntity<{{name}}Response>> update{{name}}(
 	))
 	.onErrorResume(ex -> {
 	log.error("Failed to update {{nameLowerCase}}: {}", ex.getMessage(), ex);
-	return Mono.just(ResponseEntity.internalServerError().build());
+	return Mono.just(ApiResponseDto.error("Failed to update {{nameLowerCase}}: " + ex.getMessage()));
 	});
 	}
 }

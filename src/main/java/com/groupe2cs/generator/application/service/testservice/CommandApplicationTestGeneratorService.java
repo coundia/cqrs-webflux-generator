@@ -27,29 +27,44 @@ public class CommandApplicationTestGeneratorService {
         this.generatorProperties = generatorProperties;
     }
 
-    public void generate(EntityDefinition definition, String baseDir) {
-        String packagePath = baseDir + "/" + generatorProperties.getApplicationPackage();
-        String packageName = Utils.getTestPackage(packagePath);
-        String outputDir = Utils.getTestDir(packagePath);
+    public void generate(EntityDefinition definition, String outputDir) {
+        List<String> commandTypes = List.of("Create", "Update", "Delete");
 
-        List<Map<String, Object>> fields = FieldTransformer.transform(definition.getAllFieldsWithoutOneToMany(), definition.getName());
+        for (String type : commandTypes) {
+            generateCommandHandlerTest(type, definition, outputDir);
+        }
+    }
 
-        Map<String, Object> context = new HashMap<>();
-        context.put("package", packageName);
-        context.put("className", "Create" + definition.getName() + "CommandTest");
-        context.put("commandName", "Create" + definition.getName() + "Command");
-        context.put("eventName", definition.getName() + "CreatedEvent");
-        context.put("fields", fields);
+    private void generateCommandHandlerTest(String prefix, EntityDefinition definition, String baseDir) {
+        Map<String, Object> context = new HashMap<>(definition.toMap());
+
+        String fullPath = baseDir + "/" + generatorProperties.getApplicationPackage();
+        String packageName = Utils.getTestPackage(fullPath);
+        String outputDir = Utils.getTestDir(fullPath);
+
+        context.put("package", Utils.getPackage(packageName));
         context.put("entity", definition.getName());
+        context.put("name", prefix + definition.getName());
+        context.put("commandName", prefix + definition.getName() + "Command");
+        context.put("eventName", definition.getName() + "CreatedEvent");
+        context.put("className", prefix + definition.getName() + "CommandHandlerTest");
+        context.put("fields", FieldTransformer.transform(definition.getFields(), definition.getName()));
+        context.put("isDelete", prefix.equalsIgnoreCase("Delete"));
+        context.put("isUpdate", prefix.equalsIgnoreCase("Update"));
+        context.put("isCreate", prefix.equalsIgnoreCase("Create"));
 
         Set<String> imports = new LinkedHashSet<>();
-        imports.add(Utils.getTestPackage(baseDir + "/" + generatorProperties.getSharedPackage()) + ".*");
-        imports.add(Utils.getTestPackage(baseDir + "/" + generatorProperties.getCommandPackage()) + ".*");
-        imports.add(Utils.getTestPackage(baseDir + "/" + generatorProperties.getEventPackage()) + ".*");
-        imports.add(Utils.getTestPackage(baseDir + "/" + generatorProperties.getVoPackage()) + ".*");
-        imports.add("org.axonframework.commandhandling.gateway.CommandGateway");
-        imports.add("com.fasterxml.jackson.databind.ObjectMapper");
-
+        imports.add("reactor.core.publisher.Mono");
+        imports.add("org.junit.jupiter.api.Test");
+        imports.add("org.mockito.Mockito");
+        imports.add( Utils.getTestPackage(baseDir + "/" + generatorProperties.getCommandPackage()) + ".*");
+        imports.add( Utils.getTestPackage(baseDir + "/" + generatorProperties.getCommandHandlerPackage()) + ".*");
+        imports.add( Utils.getTestPackage(baseDir + "/" + generatorProperties.getRepositoryPackage()) + ".*");
+        imports.add( Utils.getTestPackage(baseDir + "/" + generatorProperties.getVoPackage()) + ".*");
+        imports.add( Utils.getTestPackage(baseDir + "/" + generatorProperties.getSsePackage()) + ".*");
+        imports.add( Utils.getTestPackage(baseDir + "/" + generatorProperties.getEntityPackage()) + ".*");
+        imports.add( Utils.getTestPackage(baseDir + "/" + generatorProperties.getSharedPackage()) + ".*");
+        imports.add("java.util.UUID");
         context.put("imports", imports);
 
         String content = templateEngine.render("tests/CommandApplicationTests.mustache", context);

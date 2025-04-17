@@ -1,0 +1,61 @@
+package {{package}};
+
+{{#imports}}
+	import {{.}};
+{{/imports}}
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import reactor.core.publisher.Mono;
+import static org.mockito.Mockito.*;
+import org.springframework.boot.test.context.SpringBootTest;
+import reactor.test.StepVerifier;
+
+@SpringBootTest
+public class {{name}}CommandHandlerTest extends BaseUnitTests {
+
+@Mock
+private {{entity}}Repository repository;
+
+@Mock
+private {{entity}}Publisher publisher;
+
+@InjectMocks
+private {{name}}CommandHandler handler;
+
+private {{name}}Command command;
+
+@BeforeEach
+void setUp() {
+{{^isDelete}}
+	command = new {{name}}Command(
+	{{#fields}}new {{entity}}{{nameCapitalized}}({{{testValue}}}){{^last}}, {{/last}}{{/fields}}
+	);
+{{/isDelete}}
+{{#isDelete}}
+	command = new {{name}}Command(new {{entity}}Id("test-id"));
+{{/isDelete}}
+}
+
+@Test
+void it_should_handle_command() {
+{{#isCreate}}
+	when(repository.insert({{#fields}}any(){{^last}}, {{/last}}{{/fields}})).thenReturn(Mono.just(new {{entity}}()));
+{{/isCreate}}
+{{#isUpdate}}
+	when(repository.save(any())).thenReturn(Mono.just(new {{entity}}()));
+{{/isUpdate}}
+{{#isDelete}}
+	when(repository.deleteById("test-id")).thenReturn(Mono.empty());
+{{/isDelete}}
+
+StepVerifier.create(handler.handle(command))
+.verifyComplete();
+
+{{^isDelete}}
+	verify(publisher, times(1)).publish(any());
+{{/isDelete}}
+}
+}

@@ -1,0 +1,45 @@
+package {{package}};
+
+{{#imports}}
+import {{.}};
+{{/imports}}
+
+import org.junit.jupiter.api.Test;
+import org.springframework.http.*;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
+import static org.assertj.core.api.Assertions.assertThat;
+
+public class {{name}}CreateControllerIntegrationTest extends BaseIntegrationTests {
+
+@Test
+void it_should_be_able_to_add_{{nameLower}}() {
+{{name}}Request requestDTO = {{name}}Request.random();
+
+MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
+{{#fields}}
+	{{^isId}}
+		body.add("{{nameCamelCase}}", requestDTO.get{{nameCapitalized}}() != null ? requestDTO.get{{nameCapitalized}}().toString() : "");
+	{{/isId}}
+{{/fields}}
+{{#fieldFiles}}
+	body.add("{{nameCamelCase}}", createFile());
+{{/fieldFiles}}
+
+HttpHeaders headers = new HttpHeaders();
+headers.setContentType(MediaType.MULTIPART_FORM_DATA);
+
+HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(body, headers);
+
+this.post("/v1/commands/{{nameLower}}", requestEntity)
+.expectStatus().isOk()
+.expectBody()
+.jsonPath("$.code").isEqualTo(1)
+.jsonPath("$.data.id").isNotEmpty()
+{{#fields}}
+	{{^isId}}
+		.jsonPath("$.data.{{nameCamelCase}}").isEqualTo(requestDTO.get{{nameCapitalized}}().toString())
+	{{/isId}}
+{{/fields}};
+}
+}

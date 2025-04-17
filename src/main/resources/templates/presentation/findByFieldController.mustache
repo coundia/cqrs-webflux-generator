@@ -1,7 +1,7 @@
 package {{package}};
 
 {{#imports}}
-import {{.}};
+	import {{.}};
 {{/imports}}
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -12,10 +12,10 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
-
+import com.pcoundia.shared.application.ApiResponseDto;
+import java.util.Optional;
 import java.util.List;
 
 @RestController
@@ -36,24 +36,26 @@ summary = "Find {{nameLowerCase}} by {{field.name}}",
 description = "Returns a list of {{nameLowerCase}}s that match the given {{field.name}}"
 )
 @ApiResponses(value = {
-@ApiResponse(responseCode = "200", description = "List of matching {{nameLowerCase}}s",
+@ApiResponse(responseCode = "200", description = "Matching {{nameLowerCase}}s",
 content = @Content(mediaType = "application/json",
-schema = @Schema(implementation = {{name}}Response.class))),
+schema = @Schema(implementation = ApiResponseDto.class))),
 @ApiResponse(responseCode = "400", description = "Invalid parameter", content = @Content),
 @ApiResponse(responseCode = "500", description = "Internal server error", content = @Content)
 })
-public Mono<ResponseEntity<List<{{name}}Response>>> findBy{{field.nameCapitalized}}(
+{{#isId}}public Mono<ApiResponseDto> findBy{{field.nameCapitalized}}({{/isId}}
+{{^isId}}public Mono<ApiResponseDto> findBy{{field.nameCapitalized}}({{/isId}}
 	@Parameter(description = "Value of the {{field.name}} to filter by", required = true)
 	@RequestParam String {{field.name}}) {
 
-	{{name}}{{field.nameCapitalized}} {{field.name}}Vo = {{name}}{{field.nameCapitalized}}.create({{field.name}});
+{{name}}{{field.nameCapitalized}} {{field.name}}Vo = {{name}}{{field.nameCapitalized}}.create({{field.name}});
 	FindBy{{field.nameCapitalized}}{{name}}Query query = new FindBy{{field.nameCapitalized}}{{name}}Query({{field.name}}Vo);
 
 	return Mono.fromFuture(handler.handle(query))
-	.map(ResponseEntity::ok)
+{{#isId}}.map(list -> list.stream().findFirst().map(ApiResponseDto::ok).orElse(ApiResponseDto.error("Not found"))){{/isId}}
+{{^isId}}.map(ApiResponseDto::ok){{/isId}}
 	.onErrorResume(ex -> {
 	log.error("Error retrieving {{nameLowerCase}} by {{field.name}}: {}", ex.getMessage(), ex);
-	return Mono.just(ResponseEntity.internalServerError().build());
+	return Mono.just(ApiResponseDto.error("Internal server error"));
 	});
 	}
 }

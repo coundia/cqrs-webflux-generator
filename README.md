@@ -24,20 +24,15 @@ Automatiser la création de code backend structuré en couches Domain / Applicat
 ## 📦 Architecture Générée
 
 ```
-src/
+project-root/
 ├── domain/
-│   └── model/
-│   └── command/
-│   └── event/
+│   └── model, events, valueObjects
 ├── application/
-│   └── service/
-│   └── handler/
+│   └── usecases, commands, queries, handlers, dto
 ├── infrastructure/
-│   └── repository/
-│   └── config/
+│   └── repository, entity, config
 ├── presentation/
-│   └── controller/
-│   └── sse
+│   └── controller (REST, SSE)
 ```
 
 ## 🔄 Fonctionnalités Générées

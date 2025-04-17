@@ -1,0 +1,53 @@
+package {{package}};
+
+{{#imports}}
+import {{.}};
+{{/imports}}
+
+import reactor.core.publisher.Mono;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
+
+public class {{name}}Fixtures {
+
+	public static Mono<{{name}}> randomOne({{name}}Repository repository) {
+
+	return repository.insert(
+	UUID.randomUUID().toString(),
+	{{#fields}}
+		{{^isId}}
+			{{{testValue}}}{{^last}}, {{/last}}
+		{{/isId}}
+	{{/fields}}
+	);
+	}
+
+	public static Mono<{{name}}> existingOrRandom({{name}}Repository repository) {
+	return repository.findAll()
+	.next()
+	.switchIfEmpty(randomOne(repository));
+	}
+
+	public static Mono<{{name}}> byId({{name}}Repository repository, String id) {
+	return repository.findById(id);
+	}
+
+	public static Mono<List<{{name}}>> randomMany({{name}}Repository repository, int count) {
+	List<Mono<{{name}}>> monos = new ArrayList<>();
+	for (int i = 0; i < count; i++) {
+	monos.add(randomOne(repository));
+	}
+	return Mono.zip(monos, results -> {
+	List<{{name}}> list = new ArrayList<>();
+	for (Object o : results) {
+	list.add(({{name}}) o);
+	}
+	return list;
+	});
+	}
+
+	public static Mono<Void> deleteAll({{name}}Repository repository) {
+		return repository.deleteAll();
+	}
+}

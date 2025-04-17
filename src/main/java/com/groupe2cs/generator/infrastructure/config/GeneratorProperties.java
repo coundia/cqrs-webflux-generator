@@ -33,5 +33,6 @@ public class GeneratorProperties {
     private String  exceptionPackage;
     private String  entityPackage;
     private String  sharedPackage;
+    private String  ssePackage;
 
 }

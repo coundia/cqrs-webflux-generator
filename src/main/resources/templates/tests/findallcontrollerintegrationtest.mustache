@@ -1,0 +1,30 @@
+package {{package}};
+
+{{#imports}}
+import {{.}};
+{{/imports}}
+
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import static org.assertj.core.api.Assertions.assertThat;
+
+public class {{name}}FindAllControllerIntegrationTest extends BaseIntegrationTests {
+
+@Autowired
+private {{name}}Repository {{nameLower}}Repository;
+
+@Test
+void it_should_be_able_to_get_all_{{nameLower}}s() {
+{{name}}Fixtures.deleteAll({{nameLower}}Repository).block();
+{{name}}Fixtures.randomMany({{nameLower}}Repository, 15).block();
+
+this.get("/v1/queries/list-{{nameLower}}?page=0&limit=10")
+.expectStatus().isOk()
+.expectBody()
+.jsonPath("$.data.content").isArray()
+.jsonPath("$.data.content.length()").isEqualTo(10)
+.jsonPath("$.data.page").isEqualTo(0)
+.jsonPath("$.data.size").isEqualTo(10)
+.jsonPath("$.data.totalElements").isEqualTo(15);
+}
+}

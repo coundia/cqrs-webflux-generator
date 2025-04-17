@@ -71,7 +71,7 @@ public class CommandGeneratorService {
         imports.add(Utils.getPackage(baseDir + "/" + generatorProperties.getCommandPackage()) + "." + prefix + definition.getName() + "Command");
         imports.add(Utils.getPackage(baseDir + "/" + generatorProperties.getRepositoryPackage()) + "." + definition.getName() + "Repository");
         imports.add(Utils.getPackage(baseDir + "/" + generatorProperties.getEntityPackage()) + "." + definition.getName());
-        imports.add(Utils.getPackage(baseDir + "/" + generatorProperties.getPresentationPackage()) + "." + definition.getName()+"Publisher");
+        imports.add(Utils.getPackage(baseDir + "/" + generatorProperties.getSsePackage()) + "." + definition.getName()+"Publisher");
         imports.add(Utils.getPackage(baseDir + "/" + generatorProperties.getMapperPackage()) + "." + definition.getName() + "Mapper");
         context.put("imports", imports);
 

@@ -68,7 +68,8 @@ public class SharedTestGeneratorService {
         context.put("className","StatusControllerTest");
 
         Set<String> imports = new LinkedHashSet<>();
-        imports.add(Utils.getTestPackage(baseDir + "/" + generatorProperties.getSharedPackage()) + ".*");
+        imports.add(Utils.getTestPackage(Utils.getParent(baseDir) + "/" + generatorProperties.getSharedPackage()) + ".*");
+        imports.add("java.util.UUID");
         context.put("imports", imports);
 
         String content = templateEngine.render("tests/controllerIntegrationTest.mustache", context);

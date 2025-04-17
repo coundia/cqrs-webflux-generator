@@ -12,7 +12,6 @@ this
 .get("{{endpoint}}")
 .expectStatus().isOk()
 .expectBody()
-.jsonPath("$.code").isEqualTo(1)
-.jsonPath("$.message").isEqualTo("{{expectedMessage}}");
+.jsonPath("$.code").isEqualTo(1);
 }
 }

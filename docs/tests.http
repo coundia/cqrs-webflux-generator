@@ -3,7 +3,7 @@ Accept: application/x-ndjson
 Content-Type: application/json
 
 {
-    "outputDir": "/Users/pcoundia/projects/cqrs-rabbitmq-webflux-starter/src/main/java/com/pcoundia/transactions",
+    "outputDir": "/Users/pcoundia/projects/cqrs-webflux-starter/src/main/java/com/pcoundia/transactions",
     "definition": {
       "name": "Transaction",
       "table": "transactions",
@@ -11,7 +11,11 @@ Content-Type: application/json
         { "name": "id", "type": "String" },
         { "name": "reference", "type": "String" },
         { "name": "amount", "type": "Double" }
-      ]
+      ],
+	  "stack": [
+		"security",
+		"rabbitmq"
+	  ]
     }
   }
 

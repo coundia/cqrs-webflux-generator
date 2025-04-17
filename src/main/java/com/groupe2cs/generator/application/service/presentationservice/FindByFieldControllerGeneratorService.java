@@ -48,6 +48,7 @@ public class FindByFieldControllerGeneratorService {
             fieldContext.put("field", field);
             String className = "FindBy" + capitalize(field.getName()) + definition.getName() + "Controller";
             fieldContext.put("className", className);
+            fieldContext.put("isId", field.isId());
 
             Set<String> imports = new LinkedHashSet<>();
             imports.add(Utils.getPackage(baseDir + "/" + generatorProperties.getVoPackage()) + ".*");

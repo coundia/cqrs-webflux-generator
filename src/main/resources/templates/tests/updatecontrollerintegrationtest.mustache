@@ -1,0 +1,36 @@
+package {{package}};
+
+{{#imports}}
+import {{.}};
+{{/imports}}
+
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import static org.assertj.core.api.Assertions.assertThat;
+
+public class {{name}}UpdateControllerIntegrationTest extends BaseIntegrationTests {
+
+@Autowired
+private {{name}}Repository {{nameLower}}Repository;
+
+@Test
+void it_should_be_able_to_update_{{nameLower}}() {
+{{name}} existing = {{name}}Fixtures.randomOne({{nameLower}}Repository).block();
+String existingId = existing.getId();
+
+{{name}}Request requestDTO = {{name}}Request.random();
+
+this.put("/v1/commands/{{nameLower}}/" + existingId, requestDTO)
+.expectStatus().isOk()
+.expectBody()
+.jsonPath("$.code").isEqualTo(1);
+
+{{name}} found = {{name}}Fixtures.byId({{nameLower}}Repository, existingId).block();
+assertThat(found).isNotNull();
+{{#fields}}
+	{{^isId}}
+		assertThat(found.get{{nameCapitalized}}()).isEqualTo(requestDTO.get{{nameCapitalized}}());
+	{{/isId}}
+{{/fields}}
+}
+}

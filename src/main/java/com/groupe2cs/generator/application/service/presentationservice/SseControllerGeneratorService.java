@@ -48,7 +48,7 @@ public class SseControllerGeneratorService {
         imports.add(Utils.getPackage(baseDir + "/" + generatorProperties.getDtoPackage()) + ".*");
         imports.add(Utils.getPackage(baseDir + "/" + generatorProperties.getMapperPackage()) + ".*");
         imports.add(Utils.getPackage(baseDir + "/" + generatorProperties.getRepositoryPackage()) + ".*");
-        imports.add(Utils.getPackage(baseDir + "/" + generatorProperties.getPresentationPackage())+"." + definition.getName()+"Publisher");
+        imports.add(Utils.getPackage(baseDir + "/" + generatorProperties.getSsePackage())+"." + definition.getName()+"Publisher");
         context.put("imports", imports);
 
         String content = templateEngine.render("presentation/sseController.mustache", context);

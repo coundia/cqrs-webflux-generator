@@ -32,7 +32,7 @@ public class SsePublisherGeneratorService {
     public void generate(EntityDefinition definition, String baseDir) {
         Map<String, Object> context = new HashMap<>(definition.toMap());
 
-        String outputDir = baseDir + "/" + generatorProperties.getPresentationPackage();
+        String outputDir = baseDir + "/" + generatorProperties.getSsePackage();
         context.put("package", Utils.getPackage(outputDir));
         context.put("name", definition.getName());
         context.put("nameLowerCase", definition.getName().toLowerCase());

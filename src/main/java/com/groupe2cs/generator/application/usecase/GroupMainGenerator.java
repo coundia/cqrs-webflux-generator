@@ -7,7 +7,9 @@ import com.groupe2cs.generator.application.service.domainservice.VoGeneratorServ
 import com.groupe2cs.generator.application.service.infrastructureservice.EntityGeneratorService;
 import com.groupe2cs.generator.application.service.infrastructureservice.RepositoryGeneratorService;
 import com.groupe2cs.generator.application.service.presentationservice.*;
-import com.groupe2cs.generator.application.service.testservice.ControllerIntegrationTestGeneratorService;
+import com.groupe2cs.generator.application.service.shared.SharedGeneratorService;
+import com.groupe2cs.generator.application.service.testservice.AllTestGeneratorService;
+import com.groupe2cs.generator.application.service.testservice.SharedTestGeneratorService;
 import com.groupe2cs.generator.infrastructure.config.GeneratorProperties;
 import com.groupe2cs.generator.application.dto.ApiResponseDto;
 import com.groupe2cs.generator.application.dto.EntityDefinitionDTO;
@@ -35,13 +37,15 @@ public class GroupMainGenerator {
     private final ListControllerGeneratorService listControllerGeneratorService;
     private final PagedResponseGeneratorService pagedResponseGeneratorService;
     private final CreateControllerGeneratorService createControllerGeneratorService;
-    private final ControllerIntegrationTestGeneratorService testControllerIntegrationTestGeneratorService;
     private final DeleteControllerGeneratorService deleteControllerGeneratorService;
     private final FindByFieldControllerGeneratorService findByFieldControllerGeneratorService;
-    private final FindByIdentifyControllerGeneratorService findByIdentifyControllerGeneratorService;
     private final UpdateControllerGeneratorService updateControllerGeneratorService;
     private final FindByFieldQueryGeneratorService findByFieldQueryGeneratorService;
     private final FindByFieldQueryHandlerGeneratorService findByFieldQueryHandlerGeneratorService;
+
+    private final AllTestGeneratorService allTestGeneratorService;
+    private final SharedGeneratorService sharedGeneratorService;
+    private final SharedTestGeneratorService sharedTestGeneratorService;
 
 
     private EntityDefinition loadFromFileDefinition() {
@@ -71,13 +75,14 @@ public class GroupMainGenerator {
             ListControllerGeneratorService listControllerGeneratorService,
             PagedResponseGeneratorService pagedResponseGeneratorService,
             CreateControllerGeneratorService createControllerGeneratorService,
-            ControllerIntegrationTestGeneratorService testControllerIntegrationTestGeneratorService,
             DeleteControllerGeneratorService deleteControllerGeneratorService,
             FindByFieldControllerGeneratorService findByFieldControllerGeneratorService,
-            FindByIdentifyControllerGeneratorService findByIdentifyControllerGeneratorService,
             UpdateControllerGeneratorService updateControllerGeneratorService,
             FindByFieldQueryGeneratorService findByFieldQueryGeneratorService,
-            FindByFieldQueryHandlerGeneratorService findByFieldQueryHandlerGeneratorService
+            FindByFieldQueryHandlerGeneratorService findByFieldQueryHandlerGeneratorService,
+            AllTestGeneratorService allTestGeneratorService,
+            SharedGeneratorService sharedGeneratorService,
+            SharedTestGeneratorService sharedTestGeneratorService
 
     ) {
         this.properties = properties;
@@ -95,15 +100,16 @@ public class GroupMainGenerator {
         this.listControllerGeneratorService = listControllerGeneratorService;
         this.pagedResponseGeneratorService = pagedResponseGeneratorService;
         this.createControllerGeneratorService = createControllerGeneratorService;
-        this.testControllerIntegrationTestGeneratorService = testControllerIntegrationTestGeneratorService;
 
         this.deleteControllerGeneratorService = deleteControllerGeneratorService;
         this.findByFieldControllerGeneratorService = findByFieldControllerGeneratorService;
-        this.findByIdentifyControllerGeneratorService = findByIdentifyControllerGeneratorService;
         this.updateControllerGeneratorService = updateControllerGeneratorService;
 
         this.findByFieldQueryGeneratorService=findByFieldQueryGeneratorService;
         this.findByFieldQueryHandlerGeneratorService=findByFieldQueryHandlerGeneratorService;
+        this.sharedGeneratorService = sharedGeneratorService;
+        this.allTestGeneratorService = allTestGeneratorService;
+        this.sharedTestGeneratorService = sharedTestGeneratorService;
     }
 
     public Flux<ApiResponseDto> generateStreaming(EntityDefinitionDTO definitionDto) {
@@ -153,12 +159,13 @@ public class GroupMainGenerator {
                 listControllerGeneratorService.generate(definition, outputDir);
                 createControllerGeneratorService.generate(definition, outputDir);
                 deleteControllerGeneratorService.generate(definition, outputDir);
-                findByIdentifyControllerGeneratorService.generate(definition, outputDir);
                 findByFieldControllerGeneratorService.generate(definition, outputDir);
                 updateControllerGeneratorService.generate(definition, outputDir);
 
                 emit(sink, "Generating tests...");
-                testControllerIntegrationTestGeneratorService.generate(outputDir);
+                sharedTestGeneratorService.generate(outputDir);
+                allTestGeneratorService.generate(definition,outputDir);
+                sharedGeneratorService.generate(definition,outputDir);
 
                 emit(sink, "✅ Code generation complete!");
 

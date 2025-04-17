@@ -25,7 +25,6 @@ public class CodeGeneratorController {
         log.info("📂 Dossier de sortie: {}", request.getOutputDir());
         log.info("📂   table: {}", request.getDefinition().getTable());
 
-
         return groupMainGenerator.generateStreaming(request);
     }
 }
