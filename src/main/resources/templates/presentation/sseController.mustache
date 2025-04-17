@@ -36,6 +36,6 @@ public Flux<ServerSentEvent<{{name}}Response>> stream() {
 
 			Flux<ServerSentEvent<{{name}}Response>> updates = publisher.stream();
 
-		return existing.concatWith(updates);
+		return existing.concatWith(updates).concatWith(Flux.never());
 	}
 }
