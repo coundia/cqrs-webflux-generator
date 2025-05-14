@@ -61,7 +61,7 @@ Content-Type: application/json
         { "name": "amount", "type": "Double" }
       ]
     }
-  }
+}
 ```
 
 ## 📱 Domaines d'application
@@ -73,5 +73,11 @@ Content-Type: application/json
 
 
 Voir le projet généré : https://github.com/coundia/cqrs-webflux-starter
+
+
+⚠️ All rights reserved.
+
+This repository is publicly visible for demonstration purposes only.
+You may not use, copy, modify, or distribute any part of this code without explicit permission from the author.
 
  

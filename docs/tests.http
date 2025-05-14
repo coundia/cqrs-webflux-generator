@@ -3,6 +3,27 @@ Accept: application/x-ndjson
 Content-Type: application/json
 
 {
+  "outputDir": "/Users/pcoundia/projects/cqrs-webflux-starter/src/main/java/com/pcoundia/accounts",
+  "definition": {
+	"name": "Account",
+	"table": "accounts",
+	"fields": [
+	  { "name": "id", "type": "String" },
+	  { "name": "account_number", "type": "String" },
+	  { "name": "balance", "type": "Double" },
+      { "name": "transactions", "type": "List<com.pcoundia.transactions.infrastructure.entity.Transaction>", "relation": "oneToMany" }
+
+	]
+  }
+}
+
+###
+
+POST http://127.0.0.1:8070/api/v1/generator/all
+Accept: application/x-ndjson
+Content-Type: application/json
+
+{
     "outputDir": "/Users/pcoundia/projects/cqrs-webflux-starter/src/main/java/com/pcoundia/transactions",
     "definition": {
       "name": "Transaction",
@@ -10,10 +31,13 @@ Content-Type: application/json
       "fields": [
         { "name": "id", "type": "String" },
         { "name": "reference", "type": "String" },
+        { "name": "source_account_id", "type": "com.pcoundia.accounts.infrastructure.entity.Account", "relation": "manyToOne" },
+        { "name": "destination_account_id", "type": "com.pcoundia.accounts.infrastructure.entity.Account", "relation": "manyToOne"  },
         { "name": "amount", "type": "Double" }
       ]
     }
   }
 
 ###
+
 
